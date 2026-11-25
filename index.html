@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Peta Akuisisi Produk & Ekosistem — Bank Mandiri KCP Gadjah Mada</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" onerror="this.onerror=null;this.href='https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css'">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" onerror="this.onerror=null;this.href='https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.css'">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" onerror="this.onerror=null;this.href='https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css'">
+<style>
+  :root {
+    --mandiri-blue: #003d79;
+    --mandiri-dark: #002347;
+    --mandiri-gold: #ffb700;
+    --mandiri-gold-light: #ffd147;
+    --bg-light: #f4f7fa;
+    --border-color: #e2e8f0;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 13.5px;
+    color: var(--text-main);
+    background: var(--bg-light);
+  }
+
+  /* ===== HEADER ===== */
+  header {
+    background: linear-gradient(135deg, var(--mandiri-dark) 0%, var(--mandiri-blue) 60%, #00509e 100%);
+    color: #fff;
+    padding: 12px 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    position: relative;
+    border-bottom: 3.5px solid var(--mandiri-gold);
+    box-shadow: 0 4px 12px rgba(0, 35, 71, 0.18);
+    z-index: 1001;
+  }
+  .brand-area {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .brand-logo-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    padding: 0;
+    flex: none;
+  }
+  .brand-logo-box img {
+    height: 46px;
+    width: auto;
+    max-width: 175px;
+    object-fit: contain;
+    display: none;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.25));
+  }
+  .brand-logo-fallback {
+    font-weight: 800;
+    font-size: 18px;
+    color: var(--mandiri-gold);
+    letter-spacing: 0.04em;
+  }
+  .brand-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .brand-title-row {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    flex-wrap: wrap;
+  }
+  header h1 {
+    font-size: 16.5px;
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: #ffffff;
+  }
+  .badge-mandiri {
+    background: rgba(255, 183, 0, 0.18);
+    border: 1px solid var(--mandiri-gold);
+    color: var(--mandiri-gold-light);
+    font-size: 10.5px;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .brand-sub {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.78);
+  }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .branch-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 6px 14px;
+    border-radius: 99px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+  }
+  .branch-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--mandiri-gold);
+    box-shadow: 0 0 0 3px rgba(255, 183, 0, 0.28);
+  }
+  .branch-info {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.15;
+  }
+  .branch-label {
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(255, 255, 255, 0.72);
+    font-weight: 600;
+  }
+  .branch-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  /* ===== LAYOUT UTAMA ===== */
+  .app {
+    display: grid;
+    grid-template-columns: 440px 1fr;
+    height: calc(100vh - 73px);
+  }
+  .side {
+    overflow-y: auto;
+    background: var(--bg-light);
+    border-right: 1px solid var(--border-color);
+    padding: 14px;
+  }
+  #map { height: 100%; width: 100%; }
+
+  .box {
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .box h3 {
+    margin: 0 0 10px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--mandiri-blue);
+  }
+
+  input, select, textarea, button { font: inherit; }
+  input[type=text], input[type=number], select, textarea {
+    width: 100%;
+    padding: 7px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #fff;
+    transition: border-color 0.2s;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--mandiri-blue);
+  }
+
+  button {
+    padding: 8px 12px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--mandiri-blue);
+    color: #fff;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, opacity 0.15s;
+  }
+  button:hover { background: var(--mandiri-dark); }
+  button.alt { background: #e2e8f0; color: var(--text-main); }
+  button.alt:hover { background: #cbd5e1; }
+  button.alt.active { background: #ffb700; color: #002952; font-weight: 700; }
+  button.go {
+    background: #16a34a;
+    font-weight: 600;
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    margin-top: 4px;
+  }
+  button.go:hover { background: #15803d; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .row { display: flex; gap: 6px; margin-bottom: 8px; align-items: center; }
+  .row > * { flex: 1; }
+  .row > button { flex: none; }
+
+  .cats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 8px;
+    margin-top: 6px;
+  }
+  .cats label {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    font-size: 12.5px;
+    cursor: pointer;
+  }
+
+  .filter-notice {
+    margin-top: 8px;
+    padding: 7px 10px;
+    border-radius: 7px;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+    font-size: 11.5px;
+    line-height: 1.4;
+  }
+
+  .stats { display: flex; flex-wrap: wrap; gap: 5px; }
+  .chip {
+    padding: 4px 9px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #fff;
+    cursor: pointer;
+    user-select: none;
+    transition: opacity 0.2s;
+  }
+  .chip.off { opacity: 0.35; }
+
+  /* List Item Card */
+  .item {
+    padding: 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+    margin-bottom: 7px;
+    background: #fff;
+    cursor: pointer;
+    display: flex;
+    gap: 10px;
+    transition: all 0.15s;
+  }
+  .item:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+    transform: translateY(-1px);
+  }
+  .dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    margin-top: 4px;
+    flex: none;
+  }
+  .item-body { flex: 1; min-width: 0; }
+  .item-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+  }
+  .item-title {
+    font-weight: 700;
+    font-size: 13.5px;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .nasabah-pill {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 700;
+    flex: none;
+    text-transform: uppercase;
+  }
+  .nasabah-bmri { background: #003d79; color: #ffb700; }
+  .nasabah-non { background: #fee2e2; color: #991b1b; }
+  .nasabah-unk { background: #f1f5f9; color: #64748b; }
+
+  .item-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+  .item-phone {
+    display: inline-block;
+    margin-top: 3px;
+    font-size: 12px;
+    color: var(--mandiri-blue);
+    font-weight: 600;
+  }
+  .item-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 5px;
+  }
+  .prod-badge {
+    font-size: 10.5px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+  .prod-badge.exist {
+    background: #ede9fe;
+    color: #5b21b6;
+  }
+  .prod-badge.offer {
+    background: #e0f2fe;
+    color: #0369a1;
+  }
+  .prod-badge.saran {
+    background: #fef3c7;
+    color: #92400e;
+  }
+
+  /* Pagination Bar */
+  .list-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 0;
+    padding: 6px 8px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+  }
+  .list-toolbar .count-txt {
+    font-size: 12px;
+    font-weight: 600;
+    color: #334155;
+  }
+  .list-toolbar select {
+    width: auto;
+    padding: 4px 7px;
+    font-size: 12px;
+  }
+  .pager {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #e2e8f0;
+  }
+  .pager button {
+    padding: 6px 11px;
+    font-size: 12px;
+  }
+  .pager-info {
+    font-size: 12px;
+    font-weight: 600;
+    color: #475569;
+    text-align: center;
+  }
+
+  .msg { font-size: 12.5px; color: var(--text-muted); margin: 6px 0 0; line-height: 1.4; }
+
+  /* Popup Styling */
+  .leaflet-popup-content { min-width: 290px; max-width: 325px; font-family: inherit; max-height: 460px; overflow-y: auto; padding-right: 4px; }
+  .pop-header { border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 8px; }
+  .pop-title { font-size: 14.5px; font-weight: 700; color: var(--mandiri-blue); display: block; }
+  .pop-sub { font-size: 12px; color: var(--text-muted); }
+  .pop-info { font-size: 12px; margin-bottom: 8px; line-height: 1.45; color: #334155; }
+  .pop-saran {
+    background: #fffbeb;
+    border-left: 3px solid #f59e0b;
+    padding: 5px 8px;
+    border-radius: 4px;
+    font-size: 11.5px;
+    color: #78350f;
+    margin-bottom: 8px;
+  }
+  .pop-label { font-size: 11.5px; font-weight: 700; color: #334155; display: block; margin: 8px 0 3px; }
+  
+  /* Segmented Button BMRI / Non-BMRI */
+  .seg-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 4px;
+    margin-bottom: 6px;
+  }
+  .seg-btn {
+    padding: 5px 4px;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    background: #f8fafc;
+    color: #475569;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+  }
+  .seg-btn.sel-unk { background: #475569; color: #fff; border-color: #475569; }
+  .seg-btn.sel-bmri { background: #003d79; color: #ffb700; border-color: #003d79; }
+  .seg-btn.sel-non { background: #dc2626; color: #fff; border-color: #dc2626; }
+
+  .prod-checks {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    background: #f8fafc;
+    padding: 6px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 4px;
+  }
+  .prod-checks.exist-box {
+    background: #f5f3ff;
+    border-color: #ddd6fe;
+  }
+  .prod-checks label {
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+  }
+  .pop-save-bar {
+    margin-top: 10px;
+    display: flex;
+    gap: 6px;
+  }
+  .btn-save-pop {
+    flex: 1;
+    background: var(--mandiri-blue);
+    color: #fff;
+    font-weight: 600;
+    font-size: 12.5px;
+    padding: 8px 10px;
+    border-radius: 7px;
+  }
+  .btn-save-pop:hover {
+    background: var(--mandiri-dark);
+  }
+  .pop-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    padding-top: 7px;
+    border-top: 1px solid #e2e8f0;
+  }
+  .pop-actions a {
+    text-decoration: none;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--mandiri-blue);
+  }
+  .btn-hide-item {
+    background: #fee2e2;
+    color: #b91c1c;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+  }
+  .btn-hide-item:hover {
+    background: #fecaca;
+  }
+
+  @media(max-width:860px) {
+    header { flex-direction: column; align-items: flex-start; padding: 12px 16px; }
+    .app { grid-template-columns: 1fr; grid-template-rows: 52vh auto; height: auto; }
+    .side { order: 2; overflow: visible; }
+    #map { order: 1; height: 52vh; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand-area">
+    <div class="brand-logo-box">
+      <img id="logoImg" alt="Logo Bank Mandiri">
+      <span id="logoTxt" class="brand-logo-fallback">BMRI</span>
+    </div>
+    <div class="brand-text">
+      <div class="brand-title-row">
+        <h1>Peta Akuisisi Produk & Ekosistem</h1>
+        <span class="badge-mandiri">Bank Mandiri</span>
+      </div>
+      <div class="brand-sub">Sistem Pemantauan Prospek & Penetrasi Produk Cabang</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="branch-pill">
+      <span class="branch-dot"></span>
+      <div class="branch-info">
+        <span class="branch-label">Unit Kerja Cabang</span>
+        <span class="branch-name" id="headerBranchName">KCP Gadjah Mada</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="app">
+  <div class="side">
+
+    <!-- STEP 1 -->
+    <div class="box">
+      <h3>1. Titik Lokasi Cabang / KCP</h3>
+      <div class="row">
+        <input type="text" id="q" placeholder="Cari alamat KCP Gadjah Mada…">
+        <button id="btnCari">Cari</button>
+      </div>
+      <div class="row">
+        <button class="alt" id="btnGps">Lokasi Saya</button>
+        <button class="alt" id="btnPick">Klik di Peta</button>
+      </div>
+      <div class="row" style="margin-bottom:0">
+        <input type="text" id="namaKantor" value="KCP Gadjah Mada" placeholder="Label Cabang (misal: KCP Gadjah Mada)">
+      </div>
+      <div class="msg" id="lokInfo">Belum ada titik cabang. Cari alamat, gunakan GPS, atau klik peta.</div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="box">
+      <h3>2. Radius & Segmen Target Usaha</h3>
+      <div class="row">
+        <span style="font-weight:600">Radius Jangkauan (km)</span>
+        <input type="number" id="radius" value="5" min="1" max="30" step="1" style="max-width:90px">
+      </div>
+      <div class="cats" id="cats"></div>
+      <div class="filter-notice">
+        <b>Filter Otomatis:</b> Sekretariat RT/RW, Posyandu, Pos Kamling, Balai Warga, Kelurahan, &amp; Rumah Ibadah otomatis disaring dari hasil pencarian.
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="alt" id="allOn">Pilih Semua</button>
+        <button class="alt" id="allOff">Kosongkan</button>
+      </div>
+      <button class="go" id="btnCariUsaha">Tarik Data Prospek Sekitar Cabang</button>
+      <button class="alt" id="btnBatal" style="display:none;width:100%;margin-top:6px">Batalkan Pencarian</button>
+      <div class="msg" id="status"></div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="box">
+      <h3>3. Monitoring Akuisisi Produk</h3>
+      <div class="stats" id="stats"></div>
+      <div class="row" style="margin-top:10px">
+        <input type="text" id="filter" placeholder="Cari nama usaha / alamat / no. telp…">
+      </div>
+      <div class="row">
+        <select id="filterNasabah">
+          <option value="">Semua Status Nasabah</option>
+          <option value="bmri">Nasabah BMRI</option>
+          <option value="non">Non-BMRI</option>
+          <option value="unk">Belum Dicek</option>
+        </select>
+        <select id="filterCat"><option value="">Semua Segmen Usaha</option></select>
+      </div>
+      <div class="row">
+        <select id="filterProd"><option value="">Filter Produk (Punya / Ditawarkan)</option></select>
+      </div>
+      <div class="row">
+        <button class="alt" id="btnExport">Ekspor Laporan CSV</button>
+        <button class="alt" id="btnReset">Reset Data</button>
+      </div>
+
+      <div class="list-toolbar">
+        <span class="count-txt" id="count">Belum ada data.</span>
+        <select id="pageSize" title="Jumlah per halaman">
+          <option value="15" selected>15 / hal</option>
+          <option value="30">30 / hal</option>
+          <option value="50">50 / hal</option>
+        </select>
+      </div>
+
+      <div id="list"></div>
+      <div class="pager" id="pager" style="display:none"></div>
+    </div>
+
+  </div>
+  <div id="map"></div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>window.L || document.write('<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"><\/script>')</script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<script>(window.L && L.markerClusterGroup) || document.write('<script src="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"><\/script>')</script>
+<script>
+// ===== LOADER LOGO DRIVE =====
+const LOGO_ID = '1wiAcUkfQkFLdnUDYGj7nJJVK2yaSTE9y';
+const LOGO_URLS = [
+  'https://lh3.googleusercontent.com/d/' + LOGO_ID,
+  'https://drive.google.com/thumbnail?id=' + LOGO_ID + '&sz=w400',
+  'https://drive.google.com/uc?export=view&id=' + LOGO_ID
+];
+(function () {
+  const img = document.getElementById('logoImg'), txt = document.getElementById('logoTxt');
+  let i = 0;
+  img.onload = () => { img.style.display = 'block'; txt.style.display = 'none'; };
+  img.onerror = () => { img.style.display = 'none'; txt.style.display = ''; if (++i < LOGO_URLS.length) img.src = LOGO_URLS[i]; };
+  img.src = LOGO_URLS[0];
+})();
+
+if (!(window.L && L.markerClusterGroup)) {
+  document.body.insertAdjacentHTML('afterbegin', '<div style="background:#dc2626;color:#fff;padding:10px 16px;font-size:13px;position:relative;z-index:9999">Library peta (Leaflet) gagal dimuat. Periksa koneksi internet lalu muat ulang halaman (Ctrl+F5).</div>');
+}
+</script>
+<script>
+const CATS = {
+  kantor: {
+    label: 'Perkantoran & Perusahaan',
+    saran: 'Payroll, Kopra, Giro',
+    sel: ['["office"~"^(company|corporation|financial|insurance|it|lawyer|accountant|architect|consulting|estate_agent|logistics|telecommunication|travel_agent|advertising|media|research|energy|construction|manufacturer|yes)$"]']
+  },
+  kuliner: {
+    label: 'Kuliner (Resto, Kafe)',
+    saran: 'EDC, QRIS, Livin\' Merchant',
+    sel: ['["amenity"~"^(restaurant|cafe|fast_food|food_court|bar|ice_cream)$"]']
+  },
+  minimarket: {
+    label: 'Minimarket & Retail Besar',
+    saran: 'EDC, QRIS, Giro, Kopra',
+    sel: ['["shop"~"^(convenience|supermarket|department_store|mall)$"]']
+  },
+  toko: {
+    label: 'Toko & Usaha Dagang',
+    saran: 'Livin\' Merchant, KUR / KUM, Tab. Bisnis',
+    sel: ['["shop"]']
+  },
+  kesehatan: {
+    label: 'Klinik, Apotek & RS',
+    saran: 'EDC, Payroll, Giro, Kredit Investasi',
+    sel: ['["amenity"~"^(pharmacy|clinic|doctors|dentist|hospital)$"]']
+  },
+  hotel: {
+    label: 'Hotel & Penginapan',
+    saran: 'EDC, Payroll, Giro, Kopra',
+    sel: ['["tourism"~"^(hotel|guest_house|hostel|motel)$"]']
+  },
+  pendidikan: {
+    label: 'Sekolah & Kampus',
+    saran: 'Virtual Account (VA), Payroll, Giro',
+    sel: ['["amenity"~"^(school|college|university|kindergarten|driving_school)$"]']
+  },
+  otomotif: {
+    label: 'SPBU, Bengkel & Otomotif',
+    saran: 'EDC, Giro, Kredit Modal Kerja',
+    sel: ['["amenity"~"^(fuel|car_wash)$"]']
+  },
+  jasa: {
+    label: 'Jasa, Salon & Laundry',
+    saran: 'QRIS, Livin\' Merchant, Tab. Bisnis',
+    sel: ['["craft"]','["leisure"~"^(fitness_centre|sports_centre)$"]']
+  },
+  wisata: {
+    label: 'Wisata & Hiburan',
+    saran: 'EDC, QRIS, Giro',
+    sel: ['["tourism"~"^(attraction|museum|theme_park|zoo)$"]','["amenity"~"^(cinema|theatre)$"]']
+  }
+};
+
+const PRODUK_LIST = [
+  'Giro / Tab. Bisnis',
+  'Payroll',
+  'Kopra',
+  'EDC / QRIS',
+  'Livin\' Merchant',
+  'Kredit (KUR/KUM/KMK)',
+];
+
+// Status Tahapan Pendekatan Lapangan
+const STATUS = {
+  belum:   { label: 'Belum Dikunjungi', color: '#64748b' },
+  hubungi: { label: 'Sudah Kontak',     color: '#2563eb' },
+  fu:      { label: 'Follow Up',        color: '#d97706' },
+  minat:   { label: 'Prospek Potensial',color: '#0891b2' },
+  closing: { label: 'Akuisisi',         color: '#16a34a' },
+  tidak:   { label: 'Belum Minat',      color: '#dc2626' }
+};
+
+const NASABAH_LABEL = {
+  unk:  { text: 'Belum Dicek', cls: 'nasabah-unk' },
+  bmri: { text: 'BMRI',        cls: 'nasabah-bmri' },
+  non:  { text: 'Non-BMRI',    cls: 'nasabah-non' }
+};
+
+// ===== FILTER FASILITAS NON-KOMERSIAL / WARGA =====
+const EXCLUDE_NAME_RE = /\b(sekretariat\s*(rt|rw|pkk|karang\s*taruna)|balai\s*(rt|rw|warga|pertemuan|desa|kelurahan|rakyat|banjar)|posyandu|pos\s*(kamling|ronda|rt|rw|yandu|kesehatan|pelayanan)|karang\s*taruna|kantor\s*(rt|rw|lurah|kelurahan|desa|kecamatan|camat|walikota|bupati|gubernur|dinas|kua|polsek|polres|koramil|kodim|bnn|bps|bpjs|imigrasi|pajak|kpp)|puskesmas|pustu|puskesmas\s*pembantu|masjid|mushola|musholla|musala|surau|langgar|gereja|vihara|wihara|pura|klenteng|kelenteng|tpa|tpq|madrasah\s*diniyah|paud|panti\s*(asuhan|jompo|werdha)|makam|pemakaman|tpu|krematorium|gardu\s*(listrik|pln)|tps\s*sampah|bank\s*sampah)\b/i;
+
+function isValidBusiness(t) {
+  const name = (t.name || '').trim();
+  if (!name || name.length < 2) return false;
+  if (EXCLUDE_NAME_RE.test(name)) return false;
+
+  if (t.government || t.community_centre || t.social_facility || t.religion || t.cemetery || t.landuse === 'cemetery') return false;
+  if (['government', 'association', 'ngo', 'political_party', 'religion', 'diplomatic', 'educational_institution'].includes(t.office)) return false;
+  if (['community_centre', 'social_facility', 'place_of_worship', 'townhall', 'courthouse', 'police', 'fire_station', 'post_office', 'public_building', 'grave_yard', 'shelter', 'toilets'].includes(t.amenity)) return false;
+
+  if (t.amenity === 'clinic' && /\b(puskesmas|pustu|posyandu)\b/i.test(name)) return false;
+
+  return true;
+}
+
+const KEY = 'peta_akuisisi_mandiri_v4';
+let db = { office: null, results: [], track: {}, hidden: [] };
+try {
+  const s = JSON.parse(localStorage.getItem(KEY)) || JSON.parse(localStorage.getItem('peta_akuisisi_mandiri_v3'));
+  if (s) {
+    db = Object.assign(db, s);
+    if (Array.isArray(db.results)) {
+      db.results = db.results.filter(r => !EXCLUDE_NAME_RE.test(r.nama || ''));
+    }
+  }
+} catch (e) {}
+
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} };
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+// ===== INISIALISASI PETA =====
+const map = L.map('map').setView([-2.5, 118], 5);
+const baseEsri = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, attribution: 'Tiles &copy; Esri &mdash; OSM' });
+const baseFr   = L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', { subdomains: 'abc', maxZoom: 19, attribution: '&copy; OpenStreetMap France' });
+const baseSat  = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, attribution: 'Tiles &copy; Esri' });
+const baseOsm  = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' });
+
+const bases = [baseEsri, baseFr, baseOsm];
+let curBase = 0, tileErr = 0;
+bases[0].addTo(map);
+L.control.layers({
+  'Peta Jalan (Esri)': baseEsri,
+  'Peta Jalan (OSM)': baseFr,
+  'Citra Satelit': baseSat,
+  'OSM Standar': baseOsm
+}, null, { position: 'topright' }).addTo(map);
+
+bases.forEach((b, i) => b.on('tileerror', () => {
+  if (i !== curBase || ++tileErr < 6) return;
+  tileErr = 0; map.removeLayer(bases[curBase]); curBase = (curBase + 1) % bases.length; bases[curBase].addTo(map);
+}));
+map.on('baselayerchange', e => { const i = bases.indexOf(e.layer); if (i >= 0) { curBase = i; tileErr = 0; } });
+
+const cluster = L.markerClusterGroup({ maxClusterRadius: 45, showCoverageOnHover: false }).addTo(map);
+let officeMarker = null, circle = null, pickMode = false, markers = {};
+let curPage = 1;
+
+// ===== UI KATEGORI & FILTER =====
+$('cats').innerHTML = Object.entries(CATS).map(([k, v]) => `<label><input type="checkbox" value="${k}" checked> ${v.label}</label>`).join('');
+$('filterCat').innerHTML += Object.entries(CATS).map(([k, v]) => `<option value="${k}">${v.label}</option>`).join('');
+$('filterProd').innerHTML += PRODUK_LIST.map(p => `<option value="${esc(p)}">Produk: ${esc(p)}</option>`).join('');
+
+$('allOn').onclick = () => document.querySelectorAll('#cats input').forEach(c => c.checked = true);
+$('allOff').onclick = () => document.querySelectorAll('#cats input').forEach(c => c.checked = false);
+
+// ===== LOKASI CABANG =====
+function setOffice(lat, lng, name, zoom) {
+  const defaultBranch = 'KCP Gadjah Mada';
+  const branchName = (name !== undefined && name !== null && name.trim() !== '') ? name : (db.office?.name || $('namaKantor').value || defaultBranch);
+  db.office = { lat, lng, name: branchName };
+  $('namaKantor').value = branchName;
+  $('headerBranchName').textContent = branchName;
+
+  if (!officeMarker) {
+    officeMarker = L.marker([lat, lng], {
+      draggable: true,
+      zIndexOffset: 1000,
+      icon: L.divIcon({
+        className: '',
+        html: '<div style="width:26px;height:26px;border-radius:50%;background:#003d79;border:3px solid #ffb700;color:#fff;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.45)">KCP</div>',
+        iconSize: [26, 26],
+        iconAnchor: [13, 13]
+      })
+    }).addTo(map);
+    officeMarker.on('dragend', e => { const p = e.target.getLatLng(); setOffice(p.lat, p.lng); });
+  } else {
+    officeMarker.setLatLng([lat, lng]);
+  }
+  officeMarker.bindTooltip(branchName);
+  drawCircle();
+  $('lokInfo').style.color = '#64748b';
+  $('lokInfo').textContent = `Titik Cabang: ${lat.toFixed(5)}, ${lng.toFixed(5)} (Pin KCP bisa digeser)`;
+  if (zoom) map.setView([lat, lng], zoom);
+  save();
+}
+
+function drawCircle() {
+  if (!db.office) return;
+  const r = (+$('radius').value || 5) * 1000;
+  if (circle) map.removeLayer(circle);
+  circle = L.circle([db.office.lat, db.office.lng], {
+    radius: r,
+    color: '#003d79',
+    weight: 2,
+    fillColor: '#003d79',
+    fillOpacity: 0.05,
+    dashArray: '6 6',
+    interactive: false
+  }).addTo(map);
+}
+
+$('radius').onchange = () => { drawCircle(); if (circle) map.fitBounds(circle.getBounds()); };
+$('namaKantor').oninput = () => {
+  const val = $('namaKantor').value.trim() || 'KCP Gadjah Mada';
+  $('headerBranchName').textContent = val;
+  if (db.office) {
+    db.office.name = val;
+    officeMarker.bindTooltip(val);
+    save();
+  }
+};
+function stopPick() {
+  pickMode = false;
+  $('btnPick').classList.remove('active');
+  $('btnPick').textContent = 'Klik di Peta';
+  map.getContainer().style.cursor = '';
+}
+$('btnPick').onclick = () => {
+  if (pickMode) {
+    stopPick();
+    $('lokInfo').style.color = '#64748b';
+    $('lokInfo').textContent = 'Pemilihan titik dibatalkan.';
+    return;
+  }
+  pickMode = true;
+  $('btnPick').classList.add('active');
+  $('btnPick').textContent = 'Batal (klik peta)';
+  $('lokInfo').style.color = '#003d79';
+  $('lokInfo').textContent = 'Klik langsung pada peta untuk menandai posisi KCP…';
+  map.getContainer().style.cursor = 'crosshair';
+};
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && pickMode) $('btnPick').onclick(); });
+map.on('click', e => {
+  if (!pickMode) return;
+  stopPick();
+  setOffice(e.latlng.lat, e.latlng.lng, undefined, 15);
+});
+
+async function lokasiDariIP() {
+  const sumber = [
+    async () => { const j = await (await fetch('https://ipwho.is/')).json(); if (!j.success) throw 0; return { lat: +j.latitude, lng: +j.longitude, kota: j.city }; },
+    async () => { const j = await (await fetch('https://get.geojs.io/v1/ip/geo.json')).json(); if (!j.latitude) throw 0; return { lat: +j.latitude, lng: +j.longitude, kota: j.city }; },
+    async () => { const j = await (await fetch('https://ipapi.co/json/')).json(); if (!j.latitude) throw 0; return { lat: +j.latitude, lng: +j.longitude, kota: j.city }; }
+  ];
+  for (const f of sumber) { try { return await f(); } catch (e) {} }
+  return null;
+}
+
+$('btnGps').onclick = () => {
+  const btn = $('btnGps'), info = $('lokInfo'), origText = 'Lokasi Saya';
+  if (btn.disabled) return;
+  btn.disabled = true; btn.textContent = 'Mencari...';
+  info.style.color = '#003d79'; info.textContent = 'Mendeteksi titik lokasi kamu...';
+  const selesai = () => { btn.disabled = false; btn.textContent = origText; };
+
+  const fallback = async alasan => {
+    const r = await lokasiDariIP();
+    if (r) {
+      setOffice(r.lat, r.lng, $('namaKantor').value || 'KCP Gadjah Mada', 14);
+      info.style.color = '#d97706';
+      info.textContent = `${alasan} Dipakai perkiraan lokasi jaringan${r.kota ? ' (' + r.kota + ')' : ''}. Geser pin KCP atau pakai "Klik di Peta" untuk posisi yang tepat.`;
+    } else {
+      info.style.color = '#dc2626';
+      info.textContent = `${alasan} Ketik alamat cabang di kolom cari atau klik "Klik di Peta".`;
+    }
+    selesai();
+  };
+
+  if (!navigator.geolocation) return fallback('Browser tidak mendukung GPS.');
+  navigator.geolocation.getCurrentPosition(
+    p => {
+      setOffice(p.coords.latitude, p.coords.longitude, undefined, 16);
+      info.style.color = '#16a34a';
+      info.textContent = `Lokasi ditemukan (${p.coords.latitude.toFixed(5)}, ${p.coords.longitude.toFixed(5)}). Geser pin jika perlu.`;
+      selesai();
+    },
+    err => {
+      let a = 'Lokasi tidak tersedia.';
+      if (err.code === 1) a = location.protocol === 'file:' ? 'Browser memblokir GPS untuk file lokal.' : 'Izin lokasi ditolak di browser.';
+      else if (err.code === 3) a = 'Pencarian lokasi timeout.';
+      fallback(a);
+    },
+    { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
+  );
+};
+
+async function cariAlamat() {
+  const q = $('q').value.trim(); if (!q) return;
+  $('lokInfo').style.color = '#003d79';
+  $('lokInfo').textContent = 'Mencari koordinat cabang…';
+  try {
+    const r = await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=id&q=' + encodeURIComponent(q));
+    const j = await r.json();
+    if (!j.length) {
+      $('lokInfo').style.color = '#dc2626';
+      $('lokInfo').textContent = 'Lokasi tidak ditemukan. Coba kata kunci lain atau klik di peta.';
+      return;
+    }
+    setOffice(+j[0].lat, +j[0].lon, $('namaKantor').value || 'KCP Gadjah Mada', 15);
+  } catch (e) {
+    $('lokInfo').style.color = '#dc2626';
+    $('lokInfo').textContent = 'Gagal mencari lokasi (periksa koneksi internet).';
+  }
+}
+$('btnCari').onclick = cariAlamat;
+$('q').addEventListener('keydown', e => { if (e.key === 'Enter') cariAlamat(); });
+
+// ===== TARIK DATA USAHA (OVERPASS / OSM) =====
+const OVERPASS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.private.coffee/api/interpreter',
+  'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter'
+];
+
+function classify(t) {
+  if (t.office) return 'kantor';
+  if (['restaurant', 'cafe', 'fast_food', 'food_court', 'bar', 'ice_cream'].includes(t.amenity)) return 'kuliner';
+  if (['convenience', 'supermarket', 'department_store', 'mall'].includes(t.shop)) return 'minimarket';
+  if (['pharmacy', 'clinic', 'doctors', 'dentist', 'hospital'].includes(t.amenity)) return 'kesehatan';
+  if (['hotel', 'guest_house', 'hostel', 'motel'].includes(t.tourism)) return 'hotel';
+  if (['fuel', 'car_wash'].includes(t.amenity)) return 'otomotif';
+  if (['school', 'college', 'university', 'kindergarten', 'driving_school'].includes(t.amenity)) return 'pendidikan';
+  if (t.shop) return 'toko';
+  if (t.craft || ['fitness_centre', 'sports_centre'].includes(t.leisure)) return 'jasa';
+  if (t.tourism || ['cinema', 'theatre'].includes(t.amenity)) return 'wisata';
+  return null;
+}
+
+function jenis(t) { return t.shop || t.amenity || t.office || t.tourism || t.craft || t.leisure || ''; }
+function hav(a, b, c, d) {
+  const R = 6371, x = Math.PI / 180, dl = (c - a) * x, dg = (d - b) * x;
+  const h = Math.sin(dl / 2) ** 2 + Math.cos(a * x) * Math.cos(c * x) * Math.sin(dg / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+
+let activeCtls = [], cancelled = false;
+async function ovQuery(q) {
+  const errs = [];
+  const tasks = OVERPASS.map(async url => {
+    const host = url.split('/')[2];
+    const ctl = new AbortController(); activeCtls.push(ctl);
+    const to = setTimeout(() => ctl.abort(), 40000);
+    try {
+      const r = await fetch(url, {
+        method: 'POST',
+        body: 'data=' + encodeURIComponent(q),
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        signal: ctl.signal
+      });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const j = await r.json();
+      if (j.remark && /error|timed out|out of memory/i.test(j.remark) && !(j.elements && j.elements.length)) throw new Error(j.remark);
+      return j;
+    } catch (e) {
+      errs.push(host + ': ' + (e.name === 'AbortError' ? 'timeout' : e.message));
+      throw e;
+    } finally { clearTimeout(to); }
+  });
+  try {
+    const j = await Promise.any(tasks);
+    activeCtls.forEach(c => c.abort()); activeCtls = [];
+    return { data: j };
+  } catch (e) {
+    activeCtls = [];
+    return { err: errs.join(' | ') };
+  }
+}
+
+$('btnBatal').onclick = () => { cancelled = true; activeCtls.forEach(c => c.abort()); };
+
+$('btnCariUsaha').onclick = async () => {
+  const st = $('status'); st.style.color = '';
+  if (!db.office) {
+    st.style.color = '#dc2626';
+    st.textContent = 'Tetapkan titik lokasi cabang terlebih dahulu pada langkah 1.';
+    return;
+  }
+  const on = [...document.querySelectorAll('#cats input:checked')].map(c => c.value);
+  if (!on.length) { st.style.color = '#dc2626'; st.textContent = 'Pilih minimal satu segmen usaha.'; return; }
+
+  const rkm = Math.min(30, Math.max(1, +$('radius').value || 5));
+  const { lat, lng } = db.office;
+  const btn = $('btnCariUsaha'), btnB = $('btnBatal');
+  btn.disabled = true; btnB.style.display = 'block'; cancelled = false;
+  curPage = 1;
+
+  const seen = new Set(), out = [], gagal = [];
+  let lastErr = '', prog = '', t0 = Date.now(), filteredOut = 0;
+  const tick = setInterval(() => { st.textContent = prog + ' (' + Math.round((Date.now() - t0) / 1000) + ' dtk)'; }, 1000);
+
+  try {
+    for (let i = 0; i < on.length && !cancelled; i++) {
+      const k = on[i]; t0 = Date.now();
+      prog = `Memindai segmen ${i + 1}/${on.length}: ${CATS[k].label} (${out.length} prospek valid)`;
+      st.textContent = prog;
+      let body = '';
+      CATS[k].sel.forEach(x => { body += `nwr${x}["name"](around:${rkm * 1000},${lat},${lng});`; });
+      const res = await ovQuery(`[out:json][timeout:30];(${body});out center tags 3000;`);
+      if (cancelled) break;
+      if (!res.data) { gagal.push(CATS[k].label); lastErr = res.err; continue; }
+
+      for (const el of res.data.elements) {
+        const t = el.tags || {};
+        const la = el.lat ?? (el.center && el.center.lat);
+        const lo = el.lon ?? (el.center && el.center.lon);
+        if (la == null || !t.name) continue;
+        const id = el.type[0] + el.id;
+        if (seen.has(id)) continue;
+        seen.add(id);
+
+        if (!isValidBusiness(t)) { filteredOut++; continue; }
+
+        const cat = classify(t);
+        if (!cat || !on.includes(cat)) continue;
+        const dist = hav(lat, lng, la, lo);
+        if (dist > rkm) continue;
+
+        const alamat = [t['addr:street'], t['addr:housenumber'], t['addr:suburb'] || t['addr:village'], t['addr:city'] || t['addr:subdistrict']].filter(Boolean).join(', ');
+        const telp = t.phone || t['contact:phone'] || t['contact:mobile'] || '';
+        out.push({ id, nama: t.name, cat, jenis: jenis(t), lat: la, lng: lo, dist, alamat, telp });
+      }
+      out.sort((a, b) => a.dist - b.dist);
+      db.results = out.slice();
+      render();
+    }
+  } catch (e) { lastErr = e.message; }
+
+  clearInterval(tick); btn.disabled = false; btnB.style.display = 'none';
+  if (cancelled) { st.style.color = '#d97706'; st.textContent = `Pencarian dibatalkan. ${out.length} prospek dimuat.`; save(); return; }
+  if (!out.length && gagal.length) {
+    st.style.color = '#dc2626';
+    st.textContent = 'Server peta gagal merespons. Periksa koneksi internet atau matikan VPN, lalu coba lagi.';
+    return;
+  }
+  out.sort((a, b) => a.dist - b.dist);
+  db.results = out; save();
+  st.style.color = '#16a34a';
+  st.textContent = `Selesai: ${out.length} prospek ditemukan (${filteredOut} fasilitas non-komersial otomatis disaring).`;
+  if (circle) map.fitBounds(circle.getBounds());
+  render();
+};
+
+// ===== RENDER LIST, PAGINATION & POPUP PETA (DENGAN TOMBOL SIMPAN) =====
+let activeStatus = new Set(Object.keys(STATUS));
+const stOf = id => {
+  const s = db.track[id] && db.track[id].s;
+  return STATUS[s] ? s : 'belum';
+};
+const nasabahOf = id => (db.track[id] && db.track[id].nasabah) || 'unk';
+
+function hideItem(id) {
+  db.hidden = db.hidden || [];
+  if (!db.hidden.includes(id)) db.hidden.push(id);
+  save();
+  map.closePopup();
+  render();
+}
+
+function popupHtml(r) {
+  const t = db.track[r.id] || {};
+  const existProds = t.existProds || [];
+  const offerProds = t.prods || [];
+  const nas = nasabahOf(r.id);
+  const telpDisplay = r.telp ? `<a href="tel:${esc(r.telp)}">${esc(r.telp)}</a>` : '<span style="color:#94a3b8">Tidak terdata di peta</span>';
+
+  return `
+    <div id="popForm_${r.id}">
+      <div class="pop-header">
+        <span class="pop-title">${esc(r.nama)}</span>
+        <span class="pop-sub">${esc(CATS[r.cat].label)} · <b>${r.dist.toFixed(2)} km</b> dari KCP</span>
+      </div>
+      <div class="pop-info">
+        ${r.alamat ? `<div>Alamat: ${esc(r.alamat)}</div>` : ''}
+        <div>Telp Kantor: ${telpDisplay}</div>
+      </div>
+      <div class="pop-saran">
+        <b>Rekomendasi Awal:</b> ${esc(CATS[r.cat].saran)}
+      </div>
+
+      <span class="pop-label">1. Status Kepesertaan Nasabah:</span>
+      <input type="hidden" id="popNas_${r.id}" value="${nas}">
+      <div class="seg-group" id="popSeg_${r.id}">
+        <div class="seg-btn ${nas === 'unk' ? 'sel-unk' : ''}" onclick="selectPopNasabah('${r.id}','unk',this)">Belum Dicek</div>
+        <div class="seg-btn ${nas === 'bmri' ? 'sel-bmri' : ''}" onclick="selectPopNasabah('${r.id}','bmri',this)">Nasabah BMRI</div>
+        <div class="seg-btn ${nas === 'non' ? 'sel-non' : ''}" onclick="selectPopNasabah('${r.id}','non',this)">Non-BMRI</div>
+      </div>
+
+      <span class="pop-label">2. Tahapan Pendekatan Cabang:</span>
+      <select id="popStat_${r.id}">
+        ${Object.entries(STATUS).map(([k, v]) => `<option value="${k}" ${stOf(r.id) === k ? 'selected' : ''}>${v.label}</option>`).join('')}
+      </select>
+
+      <span class="pop-label">3. Produk BMRI yang Sudah Dimiliki (Existing):</span>
+      <div class="prod-checks exist-box">
+        ${PRODUK_LIST.map((p, idx) => `
+          <label>
+            <input type="checkbox" class="chk-exist" value="${idx}" ${existProds.includes(p) ? 'checked' : ''} onchange="onCheckExist('${r.id}',this.checked)">
+            ${esc(p)}
+          </label>
+        `).join('')}
+      </div>
+
+      <span class="pop-label">4. Produk yang Ditawarkan / Target Akuisisi:</span>
+      <div class="prod-checks">
+        ${PRODUK_LIST.map((p, idx) => `
+          <label>
+            <input type="checkbox" class="chk-offer" value="${idx}" ${offerProds.includes(p) ? 'checked' : ''}>
+            ${esc(p)}
+          </label>
+        `).join('')}
+      </div>
+
+      <span class="pop-label">PIC / No. HP Kontak:</span>
+      <input type="text" id="popPic_${r.id}" placeholder="Nama PIC / No. WA..." value="${esc(t.pic || '')}">
+
+      <span class="pop-label">Catatan Kunjungan / Hasil Call:</span>
+      <textarea rows="2" id="popNote_${r.id}" placeholder="Info singkat hasil pendekatan...">${esc(t.note || '')}</textarea>
+
+      <div class="pop-save-bar">
+        <button type="button" class="btn-save-pop" onclick="savePopup('${r.id}')">Simpan Perubahan</button>
+      </div>
+
+      <div class="pop-actions">
+        <a href="https://www.google.com/maps/dir/?api=1&destination=${r.lat},${r.lng}" target="_blank" rel="noopener">Buka Rute Maps</a>
+        <button type="button" class="btn-hide-item" onclick="hideItem('${r.id}')" title="Sembunyikan jika bukan target prospek">Bukan Prospek</button>
+      </div>
+    </div>
+  `;
+}
+
+// Ubah pilihan di dalam form pop-up secara lokal (tanpa menutup/re-render peta)
+function selectPopNasabah(id, val, el) {
+  const hiddenInput = $('popNas_' + id);
+  if (hiddenInput) hiddenInput.value = val;
+  const group = $('popSeg_' + id);
+  if (group) {
+    group.querySelectorAll('.seg-btn').forEach(btn => {
+      btn.classList.remove('sel-unk', 'sel-bmri', 'sel-non');
+    });
+    if (el) el.classList.add('sel-' + val);
+  }
+}
+
+function onCheckExist(id, checked) {
+  const hiddenInput = $('popNas_' + id);
+  if (checked && hiddenInput && hiddenInput.value === 'unk') {
+    const group = $('popSeg_' + id);
+    const bmriBtn = group ? group.children[1] : null;
+    selectPopNasabah(id, 'bmri', bmriBtn);
+  }
+}
+
+// Simpan semua perubahan pop-up sekaligus saat tombol Simpan diklik
+function savePopup(id) {
+  const form = $('popForm_' + id);
+  if (!form) return;
+
+  const nas = $('popNas_' + id).value;
+  const stat = $('popStat_' + id).value;
+  const pic = $('popPic_' + id).value.trim();
+  const note = $('popNote_' + id).value.trim();
+
+  const existProds = [...form.querySelectorAll('.chk-exist:checked')].map(cb => PRODUK_LIST[+cb.value]);
+  const offerProds = [...form.querySelectorAll('.chk-offer:checked')].map(cb => PRODUK_LIST[+cb.value]);
+
+  db.track[id] = {
+    nasabah: nas,
+    s: stat,
+    existProds: existProds,
+    prods: offerProds,
+    pic: pic,
+    note: note
+  };
+
+  save();
+  map.closePopup();
+  render(true);
+}
+
+function goPage(p) {
+  curPage = p;
+  render(true);
+  $('count').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function render(keepView) {
+  cluster.clearLayers();
+  markers = {};
+  const f = $('filter').value.toLowerCase();
+  const fn = $('filterNasabah').value;
+  const fc = $('filterCat').value;
+  const fp = $('filterProd').value;
+  const hiddenSet = new Set(db.hidden || []);
+
+  const visibleResults = db.results.filter(r => !hiddenSet.has(r.id));
+
+  const rows = visibleResults.filter(r => {
+    const tr = db.track[r.id] || {};
+    const offerProds = tr.prods || [];
+    const existProds = tr.existProds || [];
+    const nas = nasabahOf(r.id);
+
+    const matchStatus = activeStatus.has(stOf(r.id));
+    const matchNasabah = !fn || nas === fn;
+    const matchCat = !fc || r.cat === fc;
+    const matchProd = !fp || offerProds.includes(fp) || existProds.includes(fp);
+    const searchStr = `${r.nama} ${r.alamat} ${r.telp} ${tr.pic || ''}`.toLowerCase();
+    const matchText = !f || searchStr.includes(f);
+    return matchStatus && matchNasabah && matchCat && matchProd && matchText;
+  });
+
+  // Statistik chip
+  const cnt = {};
+  visibleResults.forEach(r => { const s = stOf(r.id); cnt[s] = (cnt[s] || 0) + 1; });
+  $('stats').innerHTML = Object.entries(STATUS).map(([k, v]) => `
+    <span class="chip ${activeStatus.has(k) ? '' : 'off'}" style="background:${v.color}" data-k="${k}">
+      ${v.label}: ${cnt[k] || 0}
+    </span>
+  `).join('');
+  $('stats').querySelectorAll('.chip').forEach(c => c.onclick = () => {
+    const k = c.dataset.k;
+    activeStatus.has(k) ? activeStatus.delete(k) : activeStatus.add(k);
+    curPage = 1;
+    render();
+  });
+
+  // Render semua marker peta yang lolos filter
+  rows.forEach(r => {
+    const m = L.circleMarker([r.lat, r.lng], {
+      radius: 8,
+      color: '#fff',
+      weight: 2,
+      fillColor: STATUS[stOf(r.id)].color,
+      fillOpacity: 0.95
+    });
+    m.bindPopup(() => popupHtml(r), { closeOnClick: false });
+    markers[r.id] = m;
+    cluster.addLayer(m);
+  });
+
+  // Pagination calculation
+  const perPage = +$('pageSize').value || 15;
+  const totalPages = Math.max(1, Math.ceil(rows.length / perPage));
+  if (curPage > totalPages) curPage = totalPages;
+  if (curPage < 1) curPage = 1;
+  const startIdx = (curPage - 1) * perPage;
+  const pageRows = rows.slice(startIdx, startIdx + perPage);
+
+  $('count').textContent = visibleResults.length
+    ? `Total: ${rows.length} prospek (hal ${curPage}/${totalPages})`
+    : 'Belum ada data prospek.';
+
+  $('list').innerHTML = pageRows.map(r => {
+    const tr = db.track[r.id] || {};
+    const existProds = tr.existProds || [];
+    const offerProds = tr.prods || [];
+    const noTelp = r.telp || tr.pic || '';
+    const nasObj = NASABAH_LABEL[nasabahOf(r.id)];
+
+    let badges = '';
+    if (existProds.length) {
+      badges += existProds.map(p => `<span class="prod-badge exist">Existing: ${esc(p)}</span>`).join('');
+    }
+    if (offerProds.length) {
+      badges += offerProds.map(p => `<span class="prod-badge offer">Ditawarkan: ${esc(p)}</span>`).join('');
+    }
+    if (!existProds.length && !offerProds.length) {
+      badges = `<span class="prod-badge saran">Potensi: ${esc(CATS[r.cat].saran)}</span>`;
+    }
+
+    return `
+      <div class="item" data-id="${r.id}">
+        <span class="dot" style="background:${STATUS[stOf(r.id)].color}"></span>
+        <div class="item-body">
+          <div class="item-head">
+            <div class="item-title" title="${esc(r.nama)}">${esc(r.nama)}</div>
+            <span class="nasabah-pill ${nasObj.cls}">${nasObj.text}</span>
+          </div>
+          <div class="item-meta">${esc(CATS[r.cat].label)} · <b>${r.dist.toFixed(2)} km</b></div>
+          ${noTelp ? `<div class="item-phone">Telp / PIC: ${esc(noTelp)}</div>` : ''}
+          <div class="item-tags">${badges}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // Render navigasi halaman
+  const pagerEl = $('pager');
+  if (rows.length > perPage) {
+    pagerEl.style.display = 'flex';
+    pagerEl.innerHTML = `
+      <button type="button" class="alt" ${curPage <= 1 ? 'disabled' : ''} onclick="goPage(${curPage - 1})">&larr; Sebelumnya</button>
+      <span class="pager-info">Halaman ${curPage} dari ${totalPages}<br><small style="font-weight:400;color:#64748b">(${startIdx + 1}–${Math.min(startIdx + perPage, rows.length)} dari ${rows.length})</small></span>
+      <button type="button" class="alt" ${curPage >= totalPages ? 'disabled' : ''} onclick="goPage(${curPage + 1})">Berikutnya &rarr;</button>
+    `;
+  } else {
+    pagerEl.style.display = 'none';
+  }
+
+  $('list').querySelectorAll('.item').forEach(el => el.onclick = () => {
+    const m = markers[el.dataset.id];
+    if (m) {
+      cluster.zoomToShowLayer(m, () => {
+        map.setView(m.getLatLng(), Math.max(map.getZoom(), 17));
+        m.openPopup();
+      });
+    }
+  });
+}
+
+$('filter').oninput = () => { curPage = 1; render(); };
+$('filterNasabah').onchange = () => { curPage = 1; render(); };
+$('filterCat').onchange = () => { curPage = 1; render(); };
+$('filterProd').onchange = () => { curPage = 1; render(); };
+$('pageSize').onchange = () => { curPage = 1; render(); };
+
+// ===== EKSPOR LAPORAN CSV & RESET =====
+$('btnExport').onclick = () => {
+  const hiddenSet = new Set(db.hidden || []);
+  const exportRows = db.results.filter(r => !hiddenSet.has(r.id));
+  if (!exportRows.length) return alert('Belum ada data prospek untuk diekspor.');
+  const h = [
+    'Nama Perusahaan/Usaha',
+    'Segmen',
+    'Jarak (km)',
+    'Alamat Ringkas',
+    'Telepon Peta',
+    'PIC / No HP',
+    'Status Nasabah (BMRI/Non)',
+    'Tahapan Pendekatan',
+    'Produk Sudah Dimiliki (Existing)',
+    'Produk Ditawarkan',
+    'Catatan Kunjungan',
+    'Latitude',
+    'Longitude'
+  ];
+  const q = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+  const lines = [h.map(q).join(',')].concat(exportRows.map(r => {
+    const t = db.track[r.id] || {};
+    return [
+      r.nama,
+      CATS[r.cat].label,
+      r.dist.toFixed(2),
+      r.alamat,
+      r.telp,
+      t.pic || '',
+      NASABAH_LABEL[nasabahOf(r.id)].text,
+      STATUS[stOf(r.id)].label,
+      (t.existProds || []).join('; '),
+      (t.prods || []).join('; '),
+      t.note || '',
+      r.lat,
+      r.lng
+    ].map(q).join(',');
+  }));
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' }));
+  a.download = 'monitoring-akuisisi-kcp-gadjah-mada-' + new Date().toISOString().slice(0, 10) + '.csv';
+  a.click();
+};
+
+$('btnReset').onclick = () => {
+  if (confirm('Hapus seluruh riwayat pemantauan & data prospek yang tersimpan di browser ini?')) {
+    localStorage.removeItem(KEY);
+    location.reload();
+  }
+};
+
+// ===== INIT =====
+if (db.office) {
+  setOffice(db.office.lat, db.office.lng, db.office.name || 'KCP Gadjah Mada', 13);
+  if (circle) map.fitBounds(circle.getBounds());
+} else {
+  $('headerBranchName').textContent = 'KCP Gadjah Mada';
+}
+render();
+</script>
+</body>
+</html>
