@@ -2,8 +2,9 @@
 <html lang="id">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Peta Akuisisi Produk & Ekosistem — Bank Mandiri KCP Gadjah Mada</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#003d79">
+<title>Peta Akuisisi Produk &amp; Ekosistem — Bank Mandiri KCP Gadjah Mada</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" onerror="this.onerror=null;this.href='https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css'">
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" onerror="this.onerror=null;this.href='https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.css'">
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" onerror="this.onerror=null;this.href='https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css'">
@@ -25,6 +26,10 @@
     font-size: 13.5px;
     color: var(--text-main);
     background: var(--bg-light);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
   }
 
   /* ===== HEADER ===== */
@@ -146,7 +151,8 @@
   .app {
     display: grid;
     grid-template-columns: 440px 1fr;
-    height: calc(100vh - 73px);
+    flex: 1;
+    min-height: 0;
   }
   .side {
     overflow-y: auto;
@@ -387,7 +393,7 @@
   .msg { font-size: 12.5px; color: var(--text-muted); margin: 6px 0 0; line-height: 1.4; }
 
   /* Popup Styling */
-  .leaflet-popup-content { min-width: 290px; max-width: 325px; font-family: inherit; max-height: 460px; overflow-y: auto; padding-right: 4px; }
+  .leaflet-popup-content { min-width: 290px; max-width: 325px; font-family: inherit; overflow-y: auto; padding-right: 4px; }
   .pop-header { border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 8px; }
   .pop-title { font-size: 14.5px; font-weight: 700; color: var(--mandiri-blue); display: block; }
   .pop-sub { font-size: 12px; color: var(--text-muted); }
@@ -491,11 +497,85 @@
     background: #fecaca;
   }
 
+  .app { position: relative; }
+  .mobile-nav { display: none; }
+  #mapHint {
+    display: none; position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+    z-index: 1100; align-items: center; gap: 10px; max-width: 92%;
+    background: #003d79; color: #fff; padding: 8px 12px; border-radius: 10px;
+    font-size: 13px; box-shadow: 0 4px 14px rgba(0,0,0,.3);
+  }
+  #mapHint.show { display: flex; }
+  #mapHint button { background: #ffb700; color: #002952; padding: 5px 10px; font-weight: 700; }
+
+  /* Tombol simpan selalu terlihat (popup desktop & sheet HP) */
+  .pop-save-bar { position: sticky; bottom: 0; z-index: 2; background: #fff; padding: 8px 0 6px; box-shadow: 0 -8px 8px -8px rgba(0,0,0,.2); }
+
+  /* Panel detail (HP) */
+  #sheet { display: none; position: fixed; inset: 0; z-index: 2000; background: rgba(15,23,42,.5); }
+  #sheet.show { display: flex; align-items: flex-end; justify-content: center; }
+  .sheet-panel {
+    background: #fff; width: 100%; max-width: 640px; max-height: 92vh; max-height: 92dvh;
+    border-radius: 16px 16px 0 0; display: flex; flex-direction: column; overflow: hidden;
+    box-shadow: 0 -6px 24px rgba(0,0,0,.25);
+  }
+  .sheet-bar { display: flex; justify-content: space-between; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--border-color); flex: none; }
+  .sheet-body { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; padding: 12px 14px 0; }
+  .sheet-body .pop-save-bar { margin: 10px -14px 0; padding: 8px 14px calc(8px + env(safe-area-inset-bottom, 0px)); }
+  .sheet-body .pop-actions { padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px)); }
+
+  /* ===== MOBILE ===== */
   @media(max-width:860px) {
-    header { flex-direction: column; align-items: flex-start; padding: 12px 16px; }
-    .app { grid-template-columns: 1fr; grid-template-rows: 52vh auto; height: auto; }
-    .side { order: 2; overflow: visible; }
-    #map { order: 1; height: 52vh; }
+    body { font-size: 14px; }
+    header {
+      flex-direction: row; align-items: center; flex-wrap: wrap;
+      padding: calc(8px + env(safe-area-inset-top, 0px)) 12px 8px; gap: 8px;
+    }
+    .brand-area { gap: 10px; min-width: 0; flex: 1; }
+    .brand-logo-box img { height: 34px; max-width: 110px; }
+    .brand-logo-fallback { font-size: 15px; }
+    header h1 { font-size: 14px; line-height: 1.2; }
+    .badge-mandiri, .brand-sub, .branch-label { display: none; }
+    .branch-pill { padding: 5px 10px; }
+    .branch-name { font-size: 12px; }
+
+    .app { display: block; flex: 1; min-height: 0; }
+    .side {
+      position: relative; z-index: 1; height: 100%; overflow-y: auto;
+      -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+      padding: 10px 10px 18px; border-right: 0;
+    }
+    #map { position: absolute; inset: 0; height: auto; width: auto; }
+    .app[data-view="panel"] #map { visibility: hidden; pointer-events: none; }
+    .app[data-view="map"] .side { display: none; }
+
+    .mobile-nav {
+      display: flex; background: #fff; border-top: 1px solid var(--border-color);
+      padding-bottom: env(safe-area-inset-bottom, 0px); box-shadow: 0 -2px 10px rgba(0,0,0,.08);
+    }
+    .mobile-nav button, .mobile-nav button:hover {
+      flex: 1; height: 54px; border-radius: 0; background: #fff; color: #64748b;
+      font-weight: 700; font-size: 14px;
+    }
+    .mobile-nav button.on { color: var(--mandiri-blue); box-shadow: inset 0 3px 0 var(--mandiri-gold); }
+
+    /* 16px mencegah iOS zoom otomatis saat fokus input */
+    input[type=text], input[type=number], select, textarea { font-size: 16px; padding: 10px 12px; }
+    button { min-height: 42px; }
+    .box { padding: 12px; }
+    .cats label, .prod-checks label { padding: 6px 2px; font-size: 13px; }
+    input[type=checkbox] { width: 20px; height: 20px; flex: none; }
+    .chip { padding: 7px 12px; font-size: 12px; }
+    .item { padding: 12px; }
+    .pager button { min-height: 40px; }
+    .list-toolbar select { font-size: 14px; padding: 6px 8px; }
+    .seg-btn { padding: 11px 4px; font-size: 12px; }
+
+    .leaflet-popup-content { min-width: 0; max-height: 58dvh; max-height: 58vh; margin: 12px 14px; }
+    .leaflet-popup-close-button { width: 34px !important; height: 34px !important; font-size: 24px !important; line-height: 34px !important; }
+    .pop-save-bar button, .btn-hide-item { min-height: 40px; }
+    .leaflet-control-layers-toggle { width: 40px; height: 40px; }
+    .leaflet-bar a { width: 36px; height: 36px; line-height: 36px; }
   }
 </style>
 </head>
@@ -509,7 +589,7 @@
     </div>
     <div class="brand-text">
       <div class="brand-title-row">
-        <h1>Peta Akuisisi Produk & Ekosistem</h1>
+        <h1>Peta Akuisisi Produk &amp; Ekosistem</h1>
         <span class="badge-mandiri">Bank Mandiri</span>
       </div>
       <div class="brand-sub">Sistem Pemantauan Prospek & Penetrasi Produk Cabang</div>
@@ -526,7 +606,7 @@
   </div>
 </header>
 
-<div class="app">
+<div class="app" id="appRoot" data-view="panel">
   <div class="side">
 
     <!-- STEP 1 -->
@@ -605,7 +685,23 @@
 
   </div>
   <div id="map"></div>
+  <div id="mapHint"><span id="hintTxt"></span><button type="button" id="hintCancel">Batal</button></div>
 </div>
+
+<div id="sheet">
+  <div class="sheet-panel">
+    <div class="sheet-bar">
+      <button type="button" class="alt" id="sheetMap">Lihat di Peta</button>
+      <button type="button" class="alt" id="sheetClose">Tutup</button>
+    </div>
+    <div class="sheet-body" id="sheetBody"></div>
+  </div>
+</div>
+
+<nav class="mobile-nav">
+  <button type="button" id="tabPanel" class="on">Panel &amp; Daftar</button>
+  <button type="button" id="tabMap">Peta</button>
+</nav>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>window.L || document.write('<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"><\/script>')</script>
@@ -739,7 +835,13 @@ try {
   }
 } catch (e) {}
 
-const save = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} };
+let saveWarned = false;
+const save = () => {
+  try { localStorage.setItem(KEY, JSON.stringify(db)); }
+  catch (e) {
+    if (!saveWarned) { saveWarned = true; alert('Data tidak bisa disimpan di browser (penyimpanan penuh atau diblokir). Segera ekspor CSV agar pekerjaan tidak hilang.'); }
+  }
+};
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -778,6 +880,55 @@ $('filterProd').innerHTML += PRODUK_LIST.map(p => `<option value="${esc(p)}">Pro
 $('allOn').onclick = () => document.querySelectorAll('#cats input').forEach(c => c.checked = true);
 $('allOff').onclick = () => document.querySelectorAll('#cats input').forEach(c => c.checked = false);
 
+// ===== MOBILE: TAB PANEL / PETA =====
+const mqMobile = window.matchMedia('(max-width:860px)');
+function setView(v) {
+  $('appRoot').dataset.view = v;
+  $('tabPanel').classList.toggle('on', v === 'panel');
+  $('tabMap').classList.toggle('on', v === 'map');
+  map.invalidateSize();
+}
+$('tabPanel').onclick = () => setView('panel');
+$('tabMap').onclick = () => setView('map');
+window.addEventListener('resize', () => map.invalidateSize());
+window.addEventListener('orientationchange', () => setTimeout(() => map.invalidateSize(), 300));
+function showHint(msg, cancel, ms) {
+  if (!mqMobile.matches) return;
+  $('hintTxt').textContent = msg;
+  $('hintCancel').style.display = cancel ? '' : 'none';
+  $('mapHint').classList.add('show');
+  clearTimeout(showHint.t);
+  if (ms) showHint.t = setTimeout(() => $('mapHint').classList.remove('show'), ms);
+}
+$('hintCancel').onclick = () => { if (pickMode) $('btnPick').onclick(); };
+
+// ===== DETAIL PROSPEK (panel bawah di HP, popup di desktop) =====
+let sheetId = null;
+function openSheet(id) {
+  const r = db.results.find(x => x.id === id);
+  if (!r) return;
+  sheetId = id;
+  $('sheetBody').innerHTML = popupHtml(r);
+  $('sheetBody').scrollTop = 0;
+  $('sheet').classList.add('show');
+}
+function closeSheet() {
+  sheetId = null;
+  $('sheet').classList.remove('show');
+  $('sheetBody').innerHTML = '';
+}
+function closeDetail() { map.closePopup(); closeSheet(); }
+$('sheetClose').onclick = closeSheet;
+$('sheet').onclick = e => { if (e.target === $('sheet')) closeSheet(); };
+$('sheetMap').onclick = () => {
+  const m = markers[sheetId];
+  closeSheet(); setView('map');
+  if (m) cluster.zoomToShowLayer(m, () => map.setView(m.getLatLng(), Math.max(map.getZoom(), 17)));
+};
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
+const onBp = () => { closeSheet(); render(); };
+mqMobile.addEventListener ? mqMobile.addEventListener('change', onBp) : mqMobile.addListener(onBp);
+
 // ===== LOKASI CABANG =====
 function setOffice(lat, lng, name, zoom) {
   const defaultBranch = 'KCP Gadjah Mada';
@@ -801,7 +952,7 @@ function setOffice(lat, lng, name, zoom) {
   } else {
     officeMarker.setLatLng([lat, lng]);
   }
-  officeMarker.bindTooltip(branchName);
+  officeMarker.bindTooltip(esc(branchName));
   drawCircle();
   $('lokInfo').style.color = '#64748b';
   $('lokInfo').textContent = `Titik Cabang: ${lat.toFixed(5)}, ${lng.toFixed(5)} (Pin KCP bisa digeser)`;
@@ -811,7 +962,9 @@ function setOffice(lat, lng, name, zoom) {
 
 function drawCircle() {
   if (!db.office) return;
-  const r = (+$('radius').value || 5) * 1000;
+  const rk = Math.min(30, Math.max(1, +$('radius').value || 5));
+  $('radius').value = rk;
+  const r = rk * 1000;
   if (circle) map.removeLayer(circle);
   circle = L.circle([db.office.lat, db.office.lng], {
     radius: r,
@@ -830,7 +983,7 @@ $('namaKantor').oninput = () => {
   $('headerBranchName').textContent = val;
   if (db.office) {
     db.office.name = val;
-    officeMarker.bindTooltip(val);
+    officeMarker.bindTooltip(esc(val));
     save();
   }
 };
@@ -839,6 +992,7 @@ function stopPick() {
   $('btnPick').classList.remove('active');
   $('btnPick').textContent = 'Klik di Peta';
   map.getContainer().style.cursor = '';
+  $('mapHint').classList.remove('show');
 }
 $('btnPick').onclick = () => {
   if (pickMode) {
@@ -853,12 +1007,14 @@ $('btnPick').onclick = () => {
   $('lokInfo').style.color = '#003d79';
   $('lokInfo').textContent = 'Klik langsung pada peta untuk menandai posisi KCP…';
   map.getContainer().style.cursor = 'crosshair';
+  if (mqMobile.matches) { setView('map'); showHint('Ketuk peta untuk menandai posisi KCP', true); }
 };
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && pickMode) $('btnPick').onclick(); });
 map.on('click', e => {
   if (!pickMode) return;
   stopPick();
   setOffice(e.latlng.lat, e.latlng.lng, undefined, 15);
+  showHint('Titik KCP ditandai. Buka tab Panel untuk lanjut.', false, 3500);
 });
 
 async function lokasiDariIP() {
@@ -962,7 +1118,10 @@ function hav(a, b, c, d) {
 let activeCtls = [], cancelled = false;
 async function ovQuery(q) {
   const errs = [];
-  const tasks = OVERPASS.map(async url => {
+  let done = false;
+  const tasks = OVERPASS.map(async (url, idx) => {
+    if (idx) await new Promise(r => setTimeout(r, idx * 3000));
+    if (done || cancelled) throw new Error('dilewati');
     const host = url.split('/')[2];
     const ctl = new AbortController(); activeCtls.push(ctl);
     const to = setTimeout(() => ctl.abort(), 40000);
@@ -984,6 +1143,7 @@ async function ovQuery(q) {
   });
   try {
     const j = await Promise.any(tasks);
+    done = true;
     activeCtls.forEach(c => c.abort()); activeCtls = [];
     return { data: j };
   } catch (e) {
@@ -1055,13 +1215,13 @@ $('btnCariUsaha').onclick = async () => {
   if (cancelled) { st.style.color = '#d97706'; st.textContent = `Pencarian dibatalkan. ${out.length} prospek dimuat.`; save(); return; }
   if (!out.length && gagal.length) {
     st.style.color = '#dc2626';
-    st.textContent = 'Server peta gagal merespons. Periksa koneksi internet atau matikan VPN, lalu coba lagi.';
+    st.textContent = 'Server peta gagal merespons (' + lastErr + '). Periksa koneksi internet atau matikan VPN, lalu coba lagi.';
     return;
   }
   out.sort((a, b) => a.dist - b.dist);
   db.results = out; save();
-  st.style.color = '#16a34a';
-  st.textContent = `Selesai: ${out.length} prospek ditemukan (${filteredOut} fasilitas non-komersial otomatis disaring).`;
+  st.style.color = gagal.length ? '#d97706' : '#16a34a';
+  st.textContent = `Selesai: ${out.length} prospek ditemukan (${filteredOut} fasilitas non-komersial otomatis disaring).` + (gagal.length ? ` Segmen gagal dimuat: ${gagal.join(', ')}. Jalankan lagi untuk segmen tersebut.` : '');
   if (circle) map.fitBounds(circle.getBounds());
   render();
 };
@@ -1078,7 +1238,7 @@ function hideItem(id) {
   db.hidden = db.hidden || [];
   if (!db.hidden.includes(id)) db.hidden.push(id);
   save();
-  map.closePopup();
+  closeDetail();
   render();
 }
 
@@ -1199,7 +1359,7 @@ function savePopup(id) {
   };
 
   save();
-  map.closePopup();
+  closeDetail();
   render(true);
 }
 
@@ -1250,6 +1410,9 @@ function render(keepView) {
     render();
   });
 
+  const vw = window.innerWidth;
+  const popOpts = { closeOnClick: false, maxWidth: Math.min(325, vw - 56), minWidth: Math.min(290, vw - 72), maxHeight: Math.max(220, Math.min(520, map.getSize().y - 150)), autoPanPadding: [12, 12] };
+
   // Render semua marker peta yang lolos filter
   rows.forEach(r => {
     const m = L.circleMarker([r.lat, r.lng], {
@@ -1259,7 +1422,8 @@ function render(keepView) {
       fillColor: STATUS[stOf(r.id)].color,
       fillOpacity: 0.95
     });
-    m.bindPopup(() => popupHtml(r), { closeOnClick: false });
+    if (mqMobile.matches) m.on('click', () => openSheet(r.id));
+    else m.bindPopup(() => popupHtml(r), popOpts);
     markers[r.id] = m;
     cluster.addLayer(m);
   });
@@ -1272,9 +1436,13 @@ function render(keepView) {
   const startIdx = (curPage - 1) * perPage;
   const pageRows = rows.slice(startIdx, startIdx + perPage);
 
-  $('count').textContent = visibleResults.length
+  const nHid = db.results.length - visibleResults.length;
+  $('count').innerHTML = esc(visibleResults.length
     ? `Total: ${rows.length} prospek (hal ${curPage}/${totalPages})`
-    : 'Belum ada data prospek.';
+    : 'Belum ada data prospek.')
+    + (nHid ? ` · <a href="#" id="restoreHidden" style="color:var(--mandiri-blue)">Pulihkan ${nHid} tersembunyi</a>` : '');
+  const rh = $('restoreHidden');
+  if (rh) rh.onclick = e => { e.preventDefault(); db.hidden = []; save(); render(); };
 
   $('list').innerHTML = pageRows.map(r => {
     const tr = db.track[r.id] || {};
@@ -1325,6 +1493,7 @@ function render(keepView) {
 
   $('list').querySelectorAll('.item').forEach(el => el.onclick = () => {
     const m = markers[el.dataset.id];
+    if (mqMobile.matches) { openSheet(el.dataset.id); return; }
     if (m) {
       cluster.zoomToShowLayer(m, () => {
         map.setView(m.getLatLng(), Math.max(map.getZoom(), 17));
@@ -1361,6 +1530,7 @@ $('btnExport').onclick = () => {
     'Longitude'
   ];
   const q = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+  const qt = v => { const x = String(v == null ? '' : v); return q(/^[=+\-@\t\r]/.test(x) ? "'" + x : x); };
   const lines = [h.map(q).join(',')].concat(exportRows.map(r => {
     const t = db.track[r.id] || {};
     return [
@@ -1377,17 +1547,18 @@ $('btnExport').onclick = () => {
       t.note || '',
       r.lat,
       r.lng
-    ].map(q).join(',');
+    ].map((v, i) => (i === 2 || i === 11 || i === 12) ? q(v) : qt(v)).join(',');
   }));
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' }));
-  a.download = 'monitoring-akuisisi-kcp-gadjah-mada-' + new Date().toISOString().slice(0, 10) + '.csv';
+  a.download = 'monitoring-akuisisi-' + (((db.office && db.office.name) || 'kcp').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'kcp') + '-' + new Date().toISOString().slice(0, 10) + '.csv';
   a.click();
 };
 
 $('btnReset').onclick = () => {
   if (confirm('Hapus seluruh riwayat pemantauan & data prospek yang tersimpan di browser ini?')) {
     localStorage.removeItem(KEY);
+    localStorage.removeItem('peta_akuisisi_mandiri_v3');
     location.reload();
   }
 };
